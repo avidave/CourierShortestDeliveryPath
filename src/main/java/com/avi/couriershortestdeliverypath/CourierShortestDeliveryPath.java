@@ -48,14 +48,6 @@ public class CourierShortestDeliveryPath {
 
         courierShortestDeliveryPath.setAPIKEY(addressScanner.nextLine());
 
-        //AIzaSyDU35Aqges10kCrzXScfiDGb_98drc0v10
-        //CA_Brampton_4 Hespeler St
-        //CA_Mississauga_1260 Garcia St
-        //CA_Brampton_1990 Steeles Ave W
-        //CA_Brampton_60 Rivermont Rd
-        //CA_Brampton_90 Clementine Dr
-        //CA_Mississauga_6966 Financial Dr
-
         while (true) {
 
             System.out.println("Please enter an address below (Country_City_Address): \nOnce all addresses have been entered enter \"-\" to finish.");
