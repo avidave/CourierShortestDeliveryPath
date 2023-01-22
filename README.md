@@ -27,6 +27,12 @@ Once all addresses have been inputted, then when prompted for the next location,
 
 Once all locations have been inputted, the program will then return the URL containing the shortest path on Google Maps.
 
+## Example Output
+
+[Generated link to example output route](https://www.google.com/maps/dir/35+Watergarden+Drive,+Mississauga,+ON/1265+Garcia+St,+Mississauga,+ON+L5V+2W8/60+Rivermont+Rd,+Brampton,+ON+L6Y+6G7/1990+Steeles+Ave+W,+Brampton,+ON+L6Y+0R4/90+Clementine+Dr,+Brampton,+ON+L6Y+5M3/)
+![image](https://user-images.githubusercontent.com/55364141/213934772-5967a39e-9d41-4a32-b5fb-03907eb063a1.png)
+
+
 ## Classes and Dependencies
 
 THe classes used include a Utility class, as well as several Java beans: Address, Location, DistanceMatrix, FullPath, Path. The logic for finding the shortest path is written in methods contained in the main class.
