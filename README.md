@@ -5,6 +5,7 @@
 A courier has multiple delivery locations that they must arrive at to deliver packages. However, the courier wants to take the shortest path by distance such that they visit each of the locations exactly once. *The program solely takes distance into account*.
 
 This program is written in Java, and is a Maven project. It uses a Gson dependency to convert java objects to JSON and vice versa. 
+It uses the Google Maps Distance Matrix and Address Validation APIs to get the location data (including distance between all locations).
 
 ## Required Inputs
 
@@ -30,12 +31,13 @@ Once all locations have been inputted, the program will then return the URL cont
 
 THe classes used include a Utility class, as well as several Java beans: Address, Location, DistanceMatrix, FullPath, Path. The logic for finding the shortest path is written in methods contained in the main class.
 
-### main
+### CourierShortestDeliveryPath (main)
 
 The main class contains the methods responsible for finding the shortest path. These methods are:
 
 * findPath - a recursive function which takes in the starting location and finds all path combinations. It utilizes a stack of FullPaths (look at the FullPath class below) to recursively find all complete shortest path combinations. Once a FullPath has been completed, it adds it to a list of completed FullPaths, which will be used to calculate the shortest path.
-* getShortestPath - which finds the path with the shortest distance.
+** Basically, findPath takes the starting location, gets the possible Paths (excluding onces containing the starting or ending locations), and creates FullPaths for each possibility (which are added to a stack). It then recursively calls itself. findPath will recognize that the stack is not empty, and will pop the latest item in the stack. It will find all possible Paths for this FullPath (excluding starting/ending locations and locations already in the FullPath), and add new FullPaths containing the Path combinations. If at any point, a FullPath popped from the stack has no combinations, a Path containing the endpoint will be added to the FullPath, and it will be added to a list of completed FullPaths.
+* getShortestPath - which finds the path with the shortest distance, using a list of completed FullPaths (and calcuating the distance for each).
 * createPath - which takes the shortest path and returns a URL that draws the shortest path on Google Maps.
 
 *Note that as inputs are entered into the main method, they are added to Address object, which are then validated. If they are valid addresses, then these objects are added to Location objects.*
@@ -53,8 +55,18 @@ The Address class requires a region code, locality, and address. It sole purpose
 
 ### Location
 
-Valid addresses are added to newly created Location objects (and to a list of locations in the main class). Location objects contain an Address object, booleans that state whether or not they are starting or ending locations, and a list of paths (to other locations). They require an Address object to be constructed, and notable methods include: isStartPoint, isEndPoint, setStartPoint, setEndPoint, setPaths, hasPath, addPath, getBranchPaths (which returns a list of locations with the starting and ending locations removed).
+Valid addresses are added to newly created Location objects (and to a list of locations in the main class). Location objects contain an Address object, booleans that state whether or not they are starting or ending locations, and a list of paths (to other locations). They require an Address object to be constructed, and some methods include: isStartPoint, isEndPoint, setStartPoint, setEndPoint, setPaths, hasPath, addPath, getBranchPaths (which returns a list of locations with the starting and ending locations removed).
 
-It uses the Google Maps Distance Matrix and Address Validation APIs to get the location data (including distance between all locations).
+### Path
+
+Paths are objects that require two Locations (the origin Location and destination Location). They are used to hold distances between locations, and to find all the combinations of FullPaths. Methods include: isLocationPresent, getFromLocation, getToLocation, getDistance, setDistance, hasEndpoint.
+
+### DistanceMatrix
+
+The DistanceMatrix class is used solely for taking the distances between locations from the Distance Matrix API. To properly get all the distances, it is designed to match the JSON object that is returned from the API call (look at the Utility class).
+
+### 
+
+The FullPath class contains a LinkedList of Paths. It is used by the main method in a Stack, to generate different route combinations. Methods include: getFp, setFp, isPathInFullPath, isFullPathComplete, isLastPathToLocation, addToFullPath, cloneFullPath, getBranchesToFullPath.
 
 
