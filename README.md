@@ -65,7 +65,7 @@ Paths are objects that require two Locations (the origin Location and destinatio
 
 The DistanceMatrix class is used solely for taking the distances between locations from the Distance Matrix API. To properly get all the distances, it is designed to match the JSON object that is returned from the API call (look at the Utility class).
 
-### 
+### FullPath
 
 The FullPath class contains a LinkedList of Paths. It is used by the main method in a Stack, to generate different route combinations. Methods include: getFp, setFp, isPathInFullPath, isFullPathComplete, isLastPathToLocation, addToFullPath, cloneFullPath, getBranchesToFullPath.
 
