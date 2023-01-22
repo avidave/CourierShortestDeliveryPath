@@ -5,14 +5,12 @@ import com.avi.couriershortestdeliverypath.beans.Location;
 import com.avi.couriershortestdeliverypath.beans.Path;
 import com.avi.couriershortestdeliverypath.beans.Address;
 import com.avi.couriershortestdeliverypath.util.Utility;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class CourierShortestDeliveryPath {
 
-    private static Stack<Path> pathStack = new Stack<Path>();
+    private static Stack<FullPath> pathStack = new Stack<FullPath>();
     private static List<FullPath> fullPaths = new LinkedList<>();
     private static List<Location> locations = new ArrayList<>();
 
@@ -21,10 +19,10 @@ public class CourierShortestDeliveryPath {
     private static Location startPointLocation;
 
     private static Scanner addressScanner = new Scanner(System.in);
+    private static boolean first = true;
     private String APIKEY;
 
     private static int nLocations;
-    //private static Logger logger = LoggerFactory.getLogger(CourierShortestDeliveryPath.class);
 
 
     public String getAPIKEY() {
@@ -36,10 +34,6 @@ public class CourierShortestDeliveryPath {
     }
 
     public static void main(String[] args) throws Exception {
-
-        // get input (Scanner)
-
-        // find location which is a start point, call findPath(location)
 
         Location loc;
 
@@ -90,95 +84,110 @@ public class CourierShortestDeliveryPath {
 
         nLocations = locations.size();
 
-        findPath(startPointLocation);
+        findPath();
+
+        createPath(getShortestPath());
     }
 
 
-    public static void findPath (Location l) {
+    public static void findPath () {
 
-        // add all paths without endpoint to stack
+        List<Path> pathsFromLocation;
 
-        // pop first path
+        if (pathStack.isEmpty() && first) {
 
-        // check whether to add to fullpath (method), returns boolean
-        // if true, find num of possibilities without end point for path, call addToFullPath(path, nPossibilities)
+            first = false;
+            pathsFromLocation = startPointLocation.getBranchPaths();
 
-        // call recursively with path
+            pathsFromLocation.forEach(path ->
+            {
+                FullPath fp = new FullPath(nLocations - 1);
+                fp.addToFullPath(path);
 
-        List<Path> pathsFromLocation = l.getBranchPaths();
+                pathStack.add(fp);
+            });
 
-        if (!pathsFromLocation.isEmpty()) {
-            pathStack.addAll(pathsFromLocation);
-        }
+            findPath();
 
-        Path p = pathStack.pop();
-        if (checkAddToFullPath(p, l)) {
-            addToFullPath(p, p.getToLocation().getBranchPaths().size());
-        }
-        findPath(p.getToLocation());
-
-
-    }
-
-    public static boolean checkAddToFullPath(Path path, Location l) {
-
-        // reverse check
-        if (path.getToLocation().equals(l))
-            return false;
-
-        // check if already in path
-        if (pathStack.contains(path))
-            return false;
-
-        return true;
-    }
-
-    public static void addToFullPath(Path path, int nFullPaths) {
-
-        boolean allCompleted = false;
-
-        // if fullPaths is empty, add nFullPath path
-        if (fullPaths.isEmpty()) {
-            for (int i = 0; i <= nFullPaths; i++) {
-                FullPath fullPath = new FullPath(nLocations - 1);
-                fullPath.addToFullPath(path);
-                fullPaths.add(fullPath);
-            }
         } else {
-            for (FullPath fp : fullPaths) {
-                if (fp.isFullPathComplete()) {
-                    allCompleted = true;
-                    continue;
+
+            if (!pathStack.isEmpty()) {
+
+
+                FullPath fp = pathStack.pop();
+
+                pathsFromLocation = fp.getBranchPathsToFullPath();
+
+                if (pathsFromLocation.isEmpty()) {
+
+                    Path lastPath = new Path(fp.getFp().getLast().getToLocation(), endPointLocation);
+                    fp.addToFullPath(lastPath);
+                    lastPath.setDistance(lastPath.getFromLocation().getPathTo(endPointLocation).getDistance());
+                    fullPaths.add(fp);
                 } else {
-                    allCompleted = false;
 
-                    FullPath growPath = new FullPath(nLocations - 1);
+                    pathsFromLocation.forEach(path ->
+                    {
+                        FullPath fullPath = new FullPath(nLocations - 1);
+                        fullPath.cloneFullPath(fp);
+                        fullPath.addToFullPath(path);
 
-                    if (fp.isPathInFullPath(path))
-                        continue;
-
-                    if (fp.isLastPathToLocation(path.getFromLocation())) {
-
-                        growPath = fp;
-                    }
-
-                    growPath.addToFullPath(path);
-
-                    for (int i = 0; i < nFullPaths - 1; i++) {
-
-                        fullPaths.add(new FullPath(nLocations - 1));
-                        fullPaths.get(i).cloneFullPath(growPath);
-                    }
-
+                        pathStack.add(fullPath);
+                    });
                 }
+
+                
+                findPath();
             }
         }
 
     }
-    public void checkPaths () {
 
+    public static FullPath getShortestPath() {
 
+        FullPath shortestPath = null;
+        double shortestDist = -1;
 
+        for (FullPath fp : fullPaths) {
 
+            double fpDist = fp.getFullPathDistance();
+
+            if (shortestDist == -1) {
+
+                shortestDist = fpDist;
+                shortestPath = fp;
+            } else if (shortestDist > fpDist) {
+
+                shortestDist = fpDist;
+                shortestPath = fp;
+            }
+        }
+
+        return shortestPath;
+    }
+
+    public static void createPath(FullPath fp) {
+
+        String URL = "https://www.google.com/maps/dir/";
+
+        Address fromAddress = fp.getFp().getFirst().getFromLocation().getAddress();
+
+        String[] pcs = fromAddress.getAddressLines().split(" ");
+        URL = URL.concat(pcs[0] + "+" + pcs[1] + "+" + pcs[2] + ",+" + fromAddress.getLocality() + ",+" + fromAddress.getRegionCode() + "/");
+
+        for (Path path : fp.getFp()) {
+
+            Address toAddress = path.getToLocation().getAddress();
+
+            String[] pieces = toAddress.getAddressLines().split(" ");
+
+            String street = pieces[0] + "+" + pieces[1] + "+" + pieces[2] + ",";
+            String locality = "+" + toAddress.getLocality() + ",";
+            String regionCode = "+" + toAddress.getRegionCode() + "/";
+
+            URL = URL.concat(street + locality + regionCode);
+        }
+
+        System.out.println("\n\n\n" + URL);
     }
 }

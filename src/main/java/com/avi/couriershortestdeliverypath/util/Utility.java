@@ -32,10 +32,8 @@ public class Utility {
         OutputStream os = connection.getOutputStream();
         OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
         osw.write(jsonADDRESS, 0, jsonADDRESS.length());
-        //System.out.println(connection.getResponseCode());
-        //AIzaSyDU35Aqges10kCrzXScfiDGb_98drc0v10System.out.println(connection.getResponseMessage());
         osw.flush();
-        osw.close();//1990 Steeles Ave W
+        osw.close();
 
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(connection.getInputStream(), "utf-8"));

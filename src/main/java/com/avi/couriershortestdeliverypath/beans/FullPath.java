@@ -1,6 +1,8 @@
 package com.avi.couriershortestdeliverypath.beans;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class FullPath {
     private LinkedList<Path> fp;
@@ -53,11 +55,51 @@ public class FullPath {
 
     public FullPath cloneFullPath(FullPath fullPath) {
 
-        // create a new FP
-        FullPath fullPath1 = new FullPath(1);
-        fullPath1.setFp((LinkedList<Path>) fullPath.getFp().clone());
+        this.setFp((LinkedList<Path>) fullPath.getFp().clone());
 
-        return fullPath1;
+        return this;
+    }
+
+    public List<Path> getBranchPathsToFullPath () {
+
+        List<Path> branchPaths = this.getFp().getLast().getToLocation().getBranchPaths();
+
+        List<Path> finalPaths = new ArrayList<Path>();
+
+        for (Path branchPath : branchPaths) {
+
+            Location toLocation = branchPath.getToLocation();
+            boolean candidatePath = false;
+            for (Path fpPath : this.getFp()) {
+
+                if (fpPath.isLocationPresent(toLocation)) {
+
+                    candidatePath = false;
+                    break;
+                }
+
+                candidatePath = true;
+            }
+
+            if (candidatePath) {
+
+                finalPaths.add(branchPath);
+            }
+        }
+
+        return finalPaths;
+    }
+
+    public double getFullPathDistance() {
+
+        double distance = 0;
+
+        for (Path path : this.getFp()) {
+
+            distance += path.getDistance();
+        }
+
+        return distance;
     }
 
     @Override

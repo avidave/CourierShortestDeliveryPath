@@ -80,4 +80,17 @@ public class Location {
                 ", isEndPoint=" + isEndPoint +
                 '}';
     }
+
+    public Path getPathTo(Location l) {
+
+        for (Path p : this.getPaths()) {
+
+            if (p.getToLocation().equals(l)) {
+
+                return p;
+            }
+        }
+
+        return null;
+    }
 }
